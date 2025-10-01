@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administrar Técnicos - Byteroot</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>Administrar Técnicos</h1>
+</header>
+
+<div>
+    <label>Nombre del técnico:</label>
+    <input type="text" id="nombreTecnico"><br><br>
+    <button onclick="agregarTecnico()">Agregar Técnico</button>
+</div>
+
+<h2>Lista de Técnicos</h2>
+<ul id="listaTecnicosAdmin"></ul>
+
+<script>
+let tecnicos = JSON.parse(localStorage.getItem("tecnicos")) || [];
+
+// Mostrar lista de técnicos
+function mostrarTecnicos() {
+    let lista = document.getElementById("listaTecnicosAdmin");
+    lista.innerHTML = "";
+
+    tecnicos.forEach((t,index) => {
+        let li = document.createElement("li");
+        li.style.display = "flex";
+        li.style.alignItems = "center";
+        li.style.gap = "10px";
+
+        // Bolita de estado
+        let bolita = document.createElement("div");
+        bolita.style.width = "12px";
+        bolita.style.height = "12px";
+        bolita.style.borderRadius = "50%";
+        bolita.style.backgroundColor = t.online ? "green" : "gray";
+
+        // Nombre del técnico
+        let nombre = document.createElement("span");
+        nombre.textContent = t.nombre;
+
+        // Botón toggle online/offline
+        let btnToggle = document.createElement("button");
+        btnToggle.textContent = t.online ? "Desconectar" : "Conectar";
+        btnToggle.onclick = () => {
+            tecnicos[index].online = !tecnicos[index].online;
+            guardarTecnicos();
+            mostrarTecnicos();
+        };
+
+        // Botón eliminar técnico
+        let btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "Eliminar";
+        btnEliminar.onclick = () => {
+            if(confirm(`¿Eliminar al técnico ${t.nombre}?`)){
+                tecnicos.splice(index,1);
+                guardarTecnicos();
+                mostrarTecnicos();
+            }
+        };
+
+        li.appendChild(bolita);
+        li.appendChild(nombre);
+        li.appendChild(btnToggle);
+        li.appendChild(btnEliminar);
+        lista.appendChild(li);
+    });
+}
+
+// Agregar técnico nuevo
+function agregarTecnico() {
+    let nombre = document.getElementById("nombreTecnico").value.trim();
+    if(!nombre){
+        alert("Debes poner un nombre");
+        return;
+    }
+    tecnicos.push({nombre:nombre, online:false});
+    guardarTecnicos();
+    document.getElementById("nombreTecnico").value = "";
+    mostrarTecnicos();
+}
+
+// Guardar en localStorage
+function guardarTecnicos() {
+    localStorage.setItem("tecnicos", JSON.stringify(tecnicos));
+}
+
+// Inicializar
+window.onload = function(){
+    mostrarTecnicos();
+}
+</script>
+</body>
+</html>
