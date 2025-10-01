@@ -1,0 +1,113 @@
+/* ===============================
+   ESTILOS GENERALES
+=============================== */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f5f5f5; /* # fondo general */
+    color: #333;         /* # color texto */
+}
+
+header h1 {
+    text-align: center;
+    color: #222; /* # color header */
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+li {
+    background: #fff; /* # fondo de cada caso */
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 1px 3px rgba(0,0,0,0.2); /* # sombra */
+}
+
+button {
+    padding: 5px 10px;
+    margin: 2px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+button:hover { opacity: 0.8; }
+
+/* BOTONES CLIENTE */
+button.enviarCaso { background-color: #007bff; color: white; }
+button.procesoCliente { background-color: #ffc107; color: black; }
+button.completoCliente { background-color: #dc3545; color: white; }
+
+/* BOTONES ADMIN */
+button.proceso { background-color: #FFA500; color: white; }
+button.completo { background-color: #28a745; color: white; }
+button.eliminar { background-color: #dc3545; color: white; }
+
+/* BURBUJA NOTIFICACIÓN */
+#notifBubble {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #ff0; /* # fondo */
+    color: #000;      /* # texto */
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+    box-shadow: 0 0 5px #000;
+    z-index: 1000;
+}
+
+/* CÍRCULO ADMIN */
+.admin-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+}
+.admin-circle::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px;
+    width: 24px; height: 24px;
+    background: url('data:image/svg+xml;utf8,<svg fill="gray" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.2c-3.3 0-9.9 1.7-9.9 5v2.7h19.8v-2.7c0-3.3-6.6-5-9.9-5z"/></svg>') no-repeat center center;
+    background-size: 70% 70%;
+    border-radius: 50%;
+}
+
+/* ESTRELLAS */
+.estrellas span {
+    font-size: 30px; cursor: pointer;
+}
+
+/* ===============================
+   TÉCNICOS ONLINE ABAJO
+=============================== */
+#tecnicosOnlineContainer {
+    position: fixed;       /* # fijo en pantalla */
+    bottom: 10px;          /* # esquina inferior */
+    right: 10px;           /* # esquina derecha */
+    background: #fff;      /* # fondo */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    width: 200px;          /* # ancho */
+    z-index: 1000;
+}
+
+#tecnicosOnlineContainer h3 { margin: 0 0 5px 0; font-size: 16px; color: #222; }
+#listaTecnicos li { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+#listaTecnicos li div { width: 12px; height: 12px; border-radius: 50%; }
+#listaTecnicos li span { font-weight: bold; color: #333; }
+
+/* RESPONSIVE */
+@media screen and (max-width: 600px) {
+    #tecnicosOnlineContainer { width: 90%; right: 5%; bottom: 10px; }
+}

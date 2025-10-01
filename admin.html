@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Byteroot - Administración</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1>Byteroot - Panel de Administración</h1>
+</header>
+
+<!-- LOGIN -->
+<div id="login">
+    <label>Usuario:</label>
+    <input type="text" id="adminUser"><br><br>
+    <label>Contraseña:</label>
+    <input type="password" id="adminPass"><br><br>
+    <button onclick="login()">Entrar</button>
+</div>
+
+<!-- PANEL ADMIN -->
+<div id="panel" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <button onclick="cerrarSesion()">Cambiar cuenta</button>
+        <div style="display:flex; align-items:center;">
+            <div class="admin-circle"></div>
+            <span id="nombreAdmin"></span>
+        </div>
+    </div>
+
+    <!-- BOTÓN ELIMINAR TODOS LOS CASOS -->
+    <div style="margin-bottom:10px;">
+        <button onclick="eliminarTodosCasos()" style="background-color:#dc3545; color:white; font-weight:bold;">Eliminar todos los casos y reseñas</button>
+    </div>
+
+    <h2>Casos en la Mesa de Servicios</h2>
+    <ul id="casosAdmin"></ul>
+    <hr>
+    <h2 style="cursor:pointer;" onclick="toggleCompletados()">Casos Realizados (<span id="contadorCompletos">0</span>)</h2>
+    <ul id="casosCompletados" style="display:none;"></ul>
+    <hr>
+    <h2>Reseñas</h2>
+    <ul id="reseñasAdmin"></ul>
+
+    <div id="notifBubble" style="position:fixed;top:10px;right:10px;background:#ff0;color:#000;padding:10px;border-radius:5px;display:none;box-shadow:0 0 5px #000;">Nuevo caso</div>
+</div>
+
+<script>
+/* ===============================
+   CONFIGURACIÓN DE ADMINISTRADORES
+=============================== */
+const admins = { "Will":"Will997","Samuel":"1234","Joshxks":"Guitarradelespacio12!*","Richi.F":"Kx450X", "Justin":"JustinFallas77$"};
+const sessionKey = "adminSession";
+const sessionDuration = 2 * 60 * 60 * 1000; // 2 horas
+let casos = JSON.parse(localStorage.getItem("casos")) || [];
+let casosPrevios = [...casos];
+let adminActual = "";
+
+/* ===============================
+   LOGIN
+=============================== */
+window.onload = function(){
+    let session = JSON.parse(localStorage.getItem(sessionKey));
+    if(session && new Date().getTime() - session.time < sessionDuration){
+        adminActual = session.user;
+        registrarTecnicoOnline(adminActual);
+        mostrarPanel();
+    }
+}
+
+function login(){
+    let user = document.getElementById("adminUser").value;
+    let pass = document.getElementById("adminPass").value;
+    if(admins[user] && admins[user] === pass){
+        adminActual = user;
+        localStorage.setItem(sessionKey, JSON.stringify({user:user, time:new Date().getTime()}));
+        registrarTecnicoOnline(adminActual);
+        mostrarPanel();
+    } else {
+        alert("Usuario o contraseña incorrectos");
+    }
+}
+
+function mostrarPanel(){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("panel").style.display = "block";
+    document.getElementById("nombreAdmin").textContent = adminActual;
+    refrescarPantalla();
+}
+
+/* ===============================
+   CERRAR SESIÓN
+=============================== */
+function cerrarSesion(){
+    registrarTecnicoOffline(adminActual);
+    localStorage.removeItem(sessionKey);
+    adminActual = "";
+    document.getElementById("panel").style.display = "none";
+    document.getElementById("login").style.display = "block";
+}
+
+/* ===============================
+   FUNCIONES PRINCIPALES
+=============================== */
+function refrescarPantalla(){
+    mostrarCasos();
+    mostrarCompletados();
+    mostrarReseñas();
+}
+
+/* Mostrar casos activos */
+function mostrarCasos(){
+    let lista = document.getElementById("casosAdmin");
+    lista.innerHTML = "";
+    casos.forEach((c,index)=>{
+        if(c.estado !== "Completo"){
+            let tecnico = (c.estado==="En Proceso") ? adminActual : "";
+            let item = document.createElement("li");
+            item.innerHTML = `
+                Caso #${c.id} - ${c.usuario} - ${c.descripcion} 
+                <span class="${c.estado.replace(" ","-")}">(${c.estado})</span>
+                ${tecnico ? ` - Técnico: ${tecnico}` : ""} 
+                <button class="proceso" onclick="cambiarEstado(${index},'En Proceso')">En Proceso</button>
+                <button class="completo" onclick="cambiarEstado(${index},'Completo')">Completo</button>
+                <button class="eliminar" onclick="eliminarCaso(${index})">Eliminar</button>
+            `;
+            lista.appendChild(item);
+        }
+    });
+}
+
+/* Cambiar estado de un caso */
+function cambiarEstado(index,nuevoEstado){
+    casos[index].estado = nuevoEstado;
+    if(nuevoEstado==="En Proceso" || nuevoEstado==="Completo") casos[index].tecnico = adminActual;
+    if(nuevoEstado==="Completo") {
+        mostrarNotificacion(`Caso #${casos[index].id} completado. Esperando calificación del usuario.`);
+    }
+    localStorage.setItem("casos",JSON.stringify(casos));
+    refrescarPantalla();
+}
+
+/* Eliminar un caso con advertencia */
+function eliminarCaso(index){
+    if(confirm(`⚠️ Atención: Vas a eliminar el caso #${casos[index].id}.\nEsta acción es irreversible. ¿Seguro que quieres continuar?`)){
+        casos.splice(index,1);
+        localStorage.setItem("casos",JSON.stringify(casos));
+        refrescarPantalla();
+    }
+}
+
+/* ===============================
+   ELIMINAR TODOS LOS CASOS Y RESEÑAS
+=============================== */
+function eliminarTodosCasos(){
+    if(confirm("⚠️ ¿Quieres eliminar todos los casos y reseñas? Esta acción es irreversible.")){
+        casos = [];
+        localStorage.setItem("casos", JSON.stringify(casos));
+        refrescarPantalla();
+        mostrarNotificacion("Todos los casos y reseñas han sido eliminados.");
+    }
+}
+
+/* Mostrar casos completados */
+function mostrarCompletados(){
+    let lista=document.getElementById("casosCompletados");
+    lista.innerHTML="";
+    let completos = casos.filter(c=>c.estado==="Completo");
+    document.getElementById("contadorCompletos").textContent = completos.length;
+    completos.forEach(c=>{
+        let item=document.createElement("li");
+        let estrellasVisual="";
+        if(c.calificacion>0){
+            for(let i=0;i<c.calificacion;i++) estrellasVisual+="⭐";
+        }
+        item.innerHTML=`Caso #${c.id} - ${c.usuario} - Técnico: ${c.tecnico || "-"} - Calificación: ${estrellasVisual||"Pendiente"}`;
+        lista.appendChild(item);
+    });
+}
+
+/* Toggle completados */
+function toggleCompletados(){
+    let lista=document.getElementById("casosCompletados");
+    lista.style.display = lista.style.display==="none"?"block":"none";
+}
+
+/* Mostrar reseñas (solo estrellas) */
+function mostrarReseñas(){
+    let lista=document.getElementById("reseñasAdmin");
+    lista.innerHTML="";
+    casos.forEach(c=>{
+        if(c.calificacion>0){
+            let item=document.createElement("li");
+            let estrellasVisual="";
+            for(let i=0;i<c.calificacion;i++) estrellasVisual+="⭐";
+            item.textContent=`${c.usuario} calificó ${c.calificacion} ${estrellasVisual}`;
+            lista.appendChild(item);
+        }
+    });
+}
+
+/* ===============================
+   BURBUJA DE NOTIFICACIÓN
+=============================== */
+function mostrarNotificacion(mensaje){
+    let bubble=document.getElementById("notifBubble");
+    bubble.textContent = mensaje;
+    bubble.style.display="block";
+    setTimeout(()=>{bubble.style.display="none"},5000);
+}
+
+/* ===============================
+   REVISAR NUEVOS CASOS CADA 3 SEGUNDOS
+=============================== */
+function revisarCasosNuevos(){
+    let actuales = JSON.parse(localStorage.getItem("casos")) || [];
+    actuales.forEach(c=>{
+        if(!casosPrevios.find(p=>p.id===c.id)){
+            mostrarNotificacion(`Nuevo caso de ${c.usuario}`);
+        }
+    });
+    casosPrevios=[...actuales];
+    casos=[...actuales];
+    refrescarPantalla();
+}
+setInterval(revisarCasosNuevos,3000);
+
+/* ===============================
+   REGISTRO DE TÉCNICOS ONLINE/OFFLINE
+=============================== */
+function registrarTecnicoOnline(nombre) {
+    let tecnicos = JSON.parse(localStorage.getItem("tecnicos")) || [];
+    let t = tecnicos.find(x => x.nombre === nombre);
+    if(!t) {
+        tecnicos.push({nombre: nombre, online: true});
+    } else {
+        t.online = true;
+    }
+    localStorage.setItem("tecnicos", JSON.stringify(tecnicos));
+}
+
+function registrarTecnicoOffline(nombre) {
+    let tecnicos = JSON.parse(localStorage.getItem("tecnicos")) || [];
+    let t = tecnicos.find(x => x.nombre === nombre);
+    if(t) t.online = false;
+    localStorage.setItem("tecnicos", JSON.stringify(tecnicos));
+}
+</script>
+</body>
+</html>
