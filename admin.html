@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Byteroot - Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Byteroot - Panel Admin</h1>
+
+<div id="loginAdmin">
+  <input id="email" placeholder="Correo técnico">
+  <input type="password" id="password" placeholder="Contraseña">
+  <button id="btnLogin">Iniciar sesión</button>
+</div>
+
+<div id="adminPanel" style="display:none">
+  <button id="btnLogout">Cerrar sesión</button>
+  <h2 id="tecnicoNombre"></h2>
+  <div id="casosPendientes">
+    <h3>Casos Pendientes</h3>
+    <ul id="listaCasosPendientes"></ul>
+  </div>
+  <div id="casosCompletadosMenu">
+    <h3>Casos Completados</h3>
+    <ul id="listaCasosCompletados"></ul>
+  </div>
+</div>
+
+<div id="notifBubble"></div>
+
+<script type="module" src="adminScript.js"></script>
+</body>
+</html>

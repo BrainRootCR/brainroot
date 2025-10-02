@@ -1,0 +1,6 @@
+#formularioCaso input, #formularioCaso textarea { display:block; margin-bottom:10px; }
+#notifBubble, #notifBubbleAdmin { position:fixed; top:10px; right:10px; background:#000; color:#fff; padding:5px 10px; display:none; border-radius:5px; }
+#tecnicosOnline li span { margin-right:5px; display:inline-block; border-radius:50%; width:12px; height:12px; }
+#menuIzquierdo { position:fixed; left:0; top:0; background:#f0f0f0; height:100%; width:60px; transition: width 0.3s; overflow:hidden; }
+#menuIzquierdo:hover { width:200px; }
+#menuExpandible { display:block; margin-top:50px; }
